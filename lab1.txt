@@ -1,0 +1,23 @@
+gcc -Wall -o ex1 ex1.c
+O "-Wall" gera avisos de erro no código que será compilado e o "-o" cria um arquivo executável.
+
+./ex1 4.0 
+O código é executado passando o parâmetro da função main.
+
+./ex1
+O código funciona, porém não recebe nenhum parâmetro, então não retorna nada.
+
+ex1
+O comando não roda, porque sem o "./", você não declara o caminho necessário ser percorrido para chegar no arquivo.
+
+gcc -Wall -c labaux.c 
+Esse comando, forma o arquivo objeto "-o"
+
+gcc -o ex2 labaux.o ex2.o
+Nesse comando, "labaux.o" e "ex2.o" se integram para usar a função criada em "labaux.c" dentro do "ex2.2" somente chamando a função.
+
+Função dump
+Mostra byte a byte do valor recebido como parâmetro 
+
+Main da função dump
+Mostra a função dump funcionando com diversos valores diferentes (int, char...)
