@@ -1,0 +1,47 @@
+Lab2)
+
+1)
+a) O programa percorre uma variável do tipo inteiro byte a byte e mostra o conteúdo de 
+memória apontado por cada região da memória.
+Estão ordenados no sistema Little Endian, porque a mais significativas estão alocadas
+nas memórias de """menor endereço"""
+
+b) long - com uma variável "long", por ela ter 8 bytes ao invés de 4 (int), ocupará
+mais espaço na memória. Como mantivemos o número 10000, ele completará os outros espaços
+da memória com zeros.
+
+c) short - Pelo short ter 2 bytes ao invés de 4 (int), ocupará menos espaço na memória.
+Como mantivemos o número 10000, ele não terá espaços para completar, assim ocupando
+todos os espaços da memória.
+
+d) O char só tem um byte, ou seja, ele mostra de acordo com a tabela ASCII em hex 
+(de acordo com o print da função dump).
+
+e) 
+"A"
+0x7ffe5ab0fb96 - 41
+0x7ffe5ab0fb97 - 00
+
+" "
+0x7ffe39674fe6 - 20
+0x7ffe39674fe7 - 00
+
+"\n"
+0x7fffb55113d6 - 0a
+0x7fffb55113d7 - 00
+
+"$"
+0x7ffd1a166206 - 24
+0x7ffd1a166207 - 00
+
+2)
+a) A função "string2num" converte uma string de dígitos em um número inteiro.
+A expressão `(*s - '0')` converte o caractere do dígito em seu valor numérico subtraindo o valor ASCII do caractere '0'.
+A variável `a` é um acumulador. Em cada etapa do loop, ela é multiplicada por 10 e o novo dígito é adicionado, construindo o número.
+
+b) A função modificada "string2num(char *s, int base)" permite converter strings em qualquer base entre 2 e 10.
+A lógica é a mesma, mas a variável "a" é multiplicada pela "base" em cada iteração, em vez de por 10.
+
+c) Para bases maiores que 10, usamos letras a-z para representar os dígitos de 10 a 35.
+A maior base possível com este esquema (dígitos 0-9 e letras a-z) é 36.
+A função precisa de uma lógica adicional para converter as letras. Por exemplo, `(*s - 'a' + 10)` converte o caractere 'a' em 10, 'b' em 11, etc.
