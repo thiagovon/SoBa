@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "ex1.C": "cpp"
+        "ex1.C": "cpp",
+        "ctype.h": "c"
     }
 }
