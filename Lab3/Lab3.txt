@@ -29,3 +29,14 @@ b)
 			Resultado(|)			
 1111	1111	0110	0101 	0100	0011 	0010	0001		
 
+2)
+int odd_ones(unsigned int x) {
+  x ^= x >> 16;
+  x ^= x >> 8;
+  x ^= x >> 4;
+  x ^= x >> 2;
+  x ^= x >> 1;
+  return x & 1;
+}
+
+3)Função implementada no arquivo ex3.c
