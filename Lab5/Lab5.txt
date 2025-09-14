@@ -3,3 +3,60 @@ Lab5 - Thiago Von
 1) Este array tem 2 elementos do tipo int. Como um int ocupa 4 bytes, o tamanho total do array é de 8 bytes (2×4 bytes).
 Este array tem 2 linhas e 3 colunas, totalizando 6 elementos (2×3). Como um short ocupa 2 bytes, o tamanho total do array é de 12 bytes (6×2 bytes).
 
+Array b:
+O array b foi inicializado de forma direta usando o contador do loop. A instrução b[i] = i atribui a cada elemento o seu próprio índice, resultando nos valores {0, 1}.
+Matriz a:
+A matriz a foi inicializada com uma fórmula (3*i+j). A execução dos loops aninhados para cada i e j preenche a matriz com uma sequência progressiva de valores de 0 a 5.
+
+2)int a;: Ocupa 4 bytes.
+short b;: Ocupa 2 bytes e é colocado logo após o int a. Ele termina em um endereço que não é um múltiplo de 4.
+int c;: Para que o int c comece em um endereço alinhado (múltiplo de 4), o compilador insere 2 bytes de preenchimento (00 00)
+O dump revela esse "buraco" de 2 bytes, que não contém dados úteis.
+Os bytes de preenchimento também são chamados de padding.
+
+3)
+a)
+O tamanho da struct X1 é de 12 bytes.
+1 (char c1) + 3 (padding) + 4 (int i) + 1 (char c2) + 3 (padding) = 12 bytes
+
+b)
+O long ocupa 8 bytes.
+O char ocupa 1 byte.
+Para que o tamanho total da struct seja um múltiplo do maior alinhamento (8 bytes, do long), o compilador adiciona 7 bytes de padding no final.
+Tamanho total: 8(long) + 1(char) + 7(padding) = 16 bytes
+
+c) 
+O int ocupa 4 bytes.
+O char ocupa 1 byte. Já que são dois, 2 bytes.
+A soma dos membros é de 6 bytes. Para que a struct seja um múltiplo de seu maior alinhamento (4 bytes, do int), o compilador adiciona 2 bytes de padding no final. 
+Tamanho total: 4(int) + 1 (char) + 1(char) + 2(padding) = 8 bytes
+
+d)
+Struct X2 tem 16 bytes.
+Char ocupa 1 byte
+16 + 1 = 17 bytes
+O tamanho total da struct deve ser um múltiplo de X2. O próximo múltiplo é 24. Então 7 bytes de padding são adicionados
+Tamanho total: 16(X2) + 1(char) + 7(padding) = 24 bytes
+
+e)
+Char ocupa 1 byte.
+Não é necessário padding, já que todo número inteiro é múltiplo de 1.
+Tamanho total: 1(char) + 1(char) + 1(char) = 3 bytes
+
+f)
+Short ocupa 2 bytes.
+Int ocupa 4 bytes.
+Char ocupa 1 byte. Como é char[3], 3 bytes.
+A soma dos membros e do preenchimento interno é 14 bytes. Para que o tamanho total da struct seja um múltiplo do maior alinhamento (4 bytes, do int), o compilador adiciona 2 bytes de preenchimento no final.
+Tamanho total: 1(short) + 2(padding) + 4(int) + 3(char) + 1(padding) + 2(short) + 2(padding) = 16 bytes
+
+g)
+Em uma union, todos os membros compartilham o mesmo espaço de memória. O tamanho é o do maior membro, que é char c[5] (5 bytes).
+O alinhamento da union é o do maior membro alinhado, que é o int (4 bytes). O compilador arredonda o tamanho total de 5 bytes para o próximo múltiplo de 4, que é 8.
+Ou seja, 8 bytes.
+
+h)
+O maior membro é o char c[5] (5 bytes).
+O alinhamento é o do short (2 bytes). O compilador arredonda o tamanho de 5 bytes para o próximo múltiplo de 2, que é 6.
+Ou seja, 6 bytes.
+
