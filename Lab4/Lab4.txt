@@ -38,4 +38,13 @@ int xbyte (packed_t word, int bytenum) {
     return (int) ((char) byte_isolado);
 }
 
-4)
+4)No primeiro caso, as variáveis são do tipo int (com sinal). Então, o padrão de bits 0xffffffff é interpretado como o valor -1. A comparação é (-1 < 2), que é verdadeira.
+
+Já no segundo caso, as variáveis são do tipo unsigned int (sem sinal). O mesmo padrão de bits 0xffffffff é interpretado como o valor positivo máximo para um inteiro de 32 bits, que é 4.294.967.295. A comparação se torna (4.294.967.295 < 2), que é falsa.
+
+No terceiro caso, programa compara um int com valor -1 e um unsigned int com valor 2.
+Para resolver a comparação, o C converte o -1 para um unsigned int de 32 bits, que é o valor 4.294.967.295. A condição avaliada pelo computador se torna (4.294.967.295 < 2), que é falsa.
+A regra de promoção de tipo explica por que o resultado é "nao", mesmo que o printf mostre o valor -1
+
+
+5) A saída do dump de ui mostrará que todos os 4 bytes estão preenchidos com 0xff, confirmando que a extensão de sinal ocorreu corretamente. O valor impresso por printf com %u será 4294967295, que é a interpretação sem sinal do padrão de bits 0xffffffff.
