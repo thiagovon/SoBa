@@ -1,0 +1,5 @@
+Lab5 - Thiago Von
+
+1) Este array tem 2 elementos do tipo int. Como um int ocupa 4 bytes, o tamanho total do array é de 8 bytes (2×4 bytes).
+Este array tem 2 linhas e 3 colunas, totalizando 6 elementos (2×3). Como um short ocupa 2 bytes, o tamanho total do array é de 12 bytes (6×2 bytes).
+
