@@ -15,7 +15,7 @@ Sf:  .string "%d\n"    # string de formato para printf
 
 # Seguimento de texto
 .text
-
+Lab14
 # definição de um símbolo global
 .globl  main
 
