@@ -1,0 +1,19 @@
+1) A tradução da primeira questão, que executa a chamada de sistema system("ls -ls"), demonstra a 
+convenção básica de passagem de argumentos em Assembly. O ponto crucial é a instrução movq $s1, %rdi,
+que carrega o endereço da string de comando no registrador %rdi. Na arquitetura AMD64, %rdi é o 
+registrador reservado para receber o primeiro argumento de uma função. A instrução call system utiliza
+o endereço que está em %rdi para saber qual comando executar, retornando um valor zero no final para
+indicar sucesso.
+
+2) A tradução da função main com o for loop, ponteiros e funções aninhadas é um exercício
+mais complexo. As variáveis C, como o contador i e o ponteiro p, são mapeadas para registradores específicos,
+geralmente %r12d e %rbx, respectivamente. O loop for é traduzido por uma combinação de rótulos, a instrução
+cmpl para a comparação com o limite, e saltos condicionais e incondicionais que controlam a iteração.
+
+A parte mais detalhada é a chamada aninhada printf("%d\n", filtro(*p,LIM)). A função filtro é chamada primeiro,
+com seus argumentos (*p e o limite 1) passados explicitamente nos registradores %edi e %esi. O valor que filtro
+retorna é depositado em %eax. Esse valor em %eax é então passado para %esi para a chamada do printf, enquanto o
+endereço da string de formato vai para %rdi. Uma instrução adicional, movl $0, %eax, é necessária antes da chamada
+ao printf para cumprir as regras da convenção de chamada de funções variádicas. Por fim, a instrução addq $4, %rbx
+avança o ponteiro p em quatro bytes, realizando a aritmética necessária para que ele aponte para o próximo elemento
+inteiro do array.
