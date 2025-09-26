@@ -1,0 +1,18 @@
+1 - O relatório de modificações inicia com a tradução da lógica de soma, onde o objetivo era 
+calcular o total dos elementos do array e imprimir apenas o resultado final. A modificação 
+central foi a introdução do registrador %r13d para acumular a soma. A instrução addl %eax, 
+%r13d foi a tradução direta de sum += *p;, e o bloco de printf foi movido para fora do loop 
+para imprimir o valor final.
+
+2 - A segunda modificação implementou a lógica if ((*p % 2) == 0) para imprimir apenas os elementos 
+pares. Para isso, foi utilizado um teste de paridade de baixo nível com andl $1, %eax, que isola o bit
+ menos significativo. O fluxo de controle foi ajustado com a instrução jne L_incrementa, que implementa
+o else de forma eficiente: se o número for ímpar (resultado não for igual a zero), o programa salta o
+bloco de impressão e vai diretamente para o incremento. É crucial que o valor original de *p seja salvo
+em um registrador diferente (%r13d) antes do teste, para que o printf não imprima um 0 ou 1.
+
+3 - Na terceira modificação, o array foi trocado para bytes (char). Isso exigiu duas alterações cruciais: 
+a aritmética de ponteiros foi ajustada, trocando addq $4, %r12 por addq $1, %r12 para avançar apenas 1 byte. 
+Mais importante, a instrução de carga de valor foi trocada para movsbl (%r12), %eax. Esta instrução é vital 
+para o alargamento com sinal (sign extension), garantindo que os números negativos (como -21) fossem corretamente 
+estendidos de 8 bits para 32 bits antes de serem impressos pelo printf, preservando o sinal.

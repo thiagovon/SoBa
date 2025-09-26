@@ -8,18 +8,12 @@ int main() {
 }
 */
 
-#Seguimento de dados (inicializados)
 .data
 nums:  .int  10, -21, -30, 45
 Sf:  .string "%d\n"    # string de formato para printf
 
-# Seguimento de texto
 .text
-Lab14
-# definição de um símbolo global
 .globl  main
-
-#símbolo main representando o ponto de entrada do código
 main:
 
 /********************************************************/
@@ -31,8 +25,8 @@ main:
   movq    %r12, -16(%rbp)
 /********************************************************/
 
-  movl  $0, %ebx  /* ebx = 0; ebx como variável i */
-  movq  $nums, %r12  /* r12 = &nums r12 é a variável p*/
+  movl  $0, %ebx  /* ebx = 0; */
+  movq  $nums, %r12  /* r12 = &nums */
 
 L1:
   cmpl  $4, %ebx  /* if (ebx == 4) ? */
@@ -47,8 +41,8 @@ L1:
   call  printf       /* chama a funcao da biblioteca */
 /*************************************************************/
 
-  addl  $1, %ebx  /* ebx += 1; i++ */
-  addq  $4, %r12  /* r12 += 4; p++ */
+  addl  $1, %ebx  /* ebx += 1; */
+  addq  $4, %r12  /* r12 += 4; */
   jmp  L1         /* goto L1; */
 
 L2:  
