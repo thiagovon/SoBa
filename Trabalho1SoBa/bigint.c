@@ -1,5 +1,5 @@
-/* Felipe Bermudes de Oliveira Leite 2421786 */
-/* Thiago Von Randow Fernandes 2420001 */
+/* Felipe Bermudes de Oliveira Leite 2421786 3WA*/
+/* Thiago Von Randow Fernandes 2420001 3WA*/
 
 #include "bigint.h"
 #include <stdio.h>

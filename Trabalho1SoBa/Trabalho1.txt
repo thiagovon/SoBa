@@ -2,7 +2,7 @@ Nome: Felipe Bermudes de Oliveira Leite
 Matrícula: 2421786
 Nome: Thiago Von Randow Fernandes
 Matrícula: 2420001
-Turma: 3WB
+Turma: 3WA
 
 O programa demonstrou desempenho satisfatório nos testes realizados com os valores predeterminados, sem a ocorrência de falhas perceptíveis.
 
