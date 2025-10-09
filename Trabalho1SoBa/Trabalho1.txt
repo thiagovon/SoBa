@@ -1,0 +1,72 @@
+Nome: Felipe Bermudes de Oliveira Leite
+Matrícula: 2421786
+Nome: Thiago Von Randow Fernandes
+Matrícula: 2420001
+Turma: 3WB
+
+O programa demonstrou desempenho satisfatório nos testes realizados com os valores predeterminados, sem a ocorrência de falhas perceptíveis.
+
+
+ABORDAGEM DE TESTE
+Para a concepção da rotina de testes de cada função, a metodologia TDD (Desenvolvimento Orientado por Testes) serviu como base.
+
+O processo foi estruturado da seguinte forma:
+Criação das Funções de Teste: Inicialmente, desenvolvemos as funções designadas para testar cada módulo , selecionando os valores de teste mais 
+apropriados para cada situação.
+
+Desenvolvimento do Código Principal: Em seguida, implementamos o código da função alvo (aquela a ser testada).
+
+Execução e Refatoração: Executamos o programa de testes para identificar quaisquer falhas. Quando um teste falhava, o sistema indicava o local do 
+erro , o que facilitava o nosso entendimento do problema, seja na função testada ou na própria função de teste. O processo de refatoração era 
+iniciado e repetido até que todos os resultados fossem os esperados.
+
+Para otimizar a verificação dos resultados, implementamos uma função auxiliar (testa_certo) cuja finalidade é comparar dois arrays do tipo BigInt, 
+verificando se o retorno da função testada é idêntico ao valor esperado.
+
+Função de Comparação (testa_certo): Esta função recebe dois BigInt (a e b), uma string de mensagem (msg) e o número do teste (test). Ela percorre os 
+bytes dos dois arrays, registrando e imprimindo a diferença (o erro) se algum byte for distinto. Ao final, retorna o contador de erros.
+
+
+
+EXEMPLOS DE TESTE (Função big_comp2)
+A função teste_da_big_comp2 demonstra a estratégia utilizada. A função big_val foi utilizada em cada teste para criar os arrays BigInt a partir dos 
+valores numéricos.
+
+Estratégia de Valores: Utilizamos um valor de long (variável padrão) para estabelecer o resultado esperado, que é então convertido para BigInt. 
+Posteriormente, os arrays de BigInt resultantes são comparados.
+
+Teste 1: Complemento a 2 de um número positivo (5): Testamos o complemento a 2 de um número positivo.
+Teste 2: Complemento a 2 de um número negativo (-7): Testamos o complemento a 2 de um número negativo.
+
+CRITÉRIOS DE CASOS DE TESTE
+Para cada função, priorizamos valores limite ou extremos que pudessem levar a falhas no sistema.
+
+Função	Casos de Teste e Justificativa
+big_val (Atribuição)		
+Usamos números positivos, negativos, zero e muito grandes. Objetivo: Verificar a correta extensão de sinal e a alocação do tamanho.
+
+Aritméticas (Soma, Subtração, Multiplicação)		
+Usamos os mesmos casos de teste da função de atribuição, porém testamos as operações entre números de sinais diferentes, números muito grandes 
+(para checar overflow) e zero.
+
+big_comp2 (Complemento a 2)		
+Testamos números positivos e negativos para verificar se seu complemento a 2 tinha sinal oposto ao número original.
+
+Deslocamento (big_shl, big_shr, big_sar)	
+Usamos números positivos e negativos (para verificar o preenchimento correto dos bits); valores de shift iguais a zero, múltiplos de 8, 127, 
+e valores não múltiplos de 8.
+
+Estrutura do Arquivo de Teste
+O arquivo utilizado para os testes contém as funções descritas, com uma função main que agrega o retorno de erros de cada chamada de função 
+de teste. Ao final da execução, é exibida a contagem total de falhas em relação ao número completo de testes realizados (45 no total).
+
+A função main realiza as seguintes chamadas de teste:
+
+erros += teste_da_big_val("big_val") 
+erros += teste_da_big_comp2("big_comp2") 
+erros += teste_da_big_sum("big_sum") 
+erros += teste_da_big_sub("big_sub") 
+erros += teste_da_big_mul("big_mul") 
+erros += teste_da_big_shl("big_shl") 
+erros += teste_da_big_shr("big_shr") 
+erros += teste_da_big_sar("big_sar") 
