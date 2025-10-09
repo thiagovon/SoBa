@@ -771,4 +771,3 @@ int main() {
    printf("Total de falhas %d de 45\n", erros);
    return 0;
 }
-
