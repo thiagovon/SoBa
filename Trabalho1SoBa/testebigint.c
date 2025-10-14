@@ -727,7 +727,7 @@ int teste_da_big_sar(char*msg){
       erros += 1;
    }
 
-   /* Shift de 8 bits */
+   /*  Shift de 8 bits*/
 
    big_sar(res6,b,8);
 
