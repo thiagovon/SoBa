@@ -1,0 +1,36 @@
+Função add(int a, int b, int c):
+A função Assembly implementa a soma de três inteiros. Após o prólogo, o valor do primeiro 
+parâmetro (a, em %edi) é movido para o registrador de retorno %eax. Em seguida, os outros 
+dois parâmetros (b, em %esi, e c, em %edx) são somados a %eax. O valor 6 é exibido ao 
+compilar a função com o main em C.
+
+Função Recursiva fat(int n) (Fatorial):
+A função Fatorial foi implementada em Assembly com lógica recursiva e manipulação de 
+registro de ativação.
+
+Caso Base: Se n (em %edi) for 0, %eax recebe 1 e a função retorna.
+
+Caso Recursivo: Caso contrário, o valor de n é salvo na pilha. Em seguida, %edi é decrementado
+ (n-1) e a função fat é chamada recursivamente.
+
+Após a chamada, o valor original de n é restaurado. O valor retornado de fat(n-1) (em %eax) é 
+multiplicado por n. %eax agora contém o fatorial correto, e a função finaliza.
+
+Função foo(int *a, int n):
+A função Assembly replica a lógica de um loop com uma condicional if para processar um array. 
+As variáveis de loop (i) e soma (s) foram mapeadas para %ecx e %ebx, ambas inicializadas com 0.
+
+Estrutura do for: O loop compara o índice %ecx com o tamanho do array %esi para determinar a 
+finalização.
+
+Acesso ao Array: Dentro do loop, o endereço de a[i] é calculado: 4×i (tamanho do inteiro × índice) 
+é somado ao endereço base do array (%rdi para %r12).
+
+Condicional if: O valor de a[i] (apontado por %r12) é comparado a 0.
+
+Se for 0: O elemento a[i] recebe o valor atual da soma (s), e a soma (s) é resetada para 0.
+
+Se não for 0: O código simplesmente pula a lógica do if.
+
+Finalização do Loop: O índice %ecx é incrementado (i++) e o loop se repete. A compilação e 
+execução conjunta com o main em C produziu o resultado esperado.

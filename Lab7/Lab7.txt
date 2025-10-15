@@ -1,0 +1,24 @@
+Programa C e Assembly (Iteração e Printagem):
+O programa original em C itera sobre um array de caracteres (char[]) e imprime cada valor como um caractere (%c), exibindo 
+o correspondente ASCII. A versão em Assembly usa um loop (L1) para percorrer o array apontado por %r12. O loop para quando 
+encontra o valor zero (\0). A cada iteração, o byte atual é carregado para %eax, impresso, e o ponteiro %r12 é incrementado 
+para avançar ao próximo byte.
+
+Modificação (Filtragem de Caracteres):
+A alteração no código Assembly introduziu uma lógica de filtragem dentro do loop. Após carregar o caractere para %eax, o 
+programa verifica se o valor é igual a 123 ({) ou 125 (}). Se for igual a um desses caracteres, o programa pula a instrução
+de impressão (PULA_PRINT), incrementa o ponteiro (%r12) e retorna ao início do loop (L1). Caso contrário, o caractere é 
+impresso normalmente antes de seguir para PULA_PRINT.
+
+Programa (Imprimir Quadrados):
+Este programa em Assembly calcula e imprime os quadrados dos números de 1 até 10. O registrador %ebx é inicializado em 1 e 
+atua como contador (i). O loop (L1) compara %ebx com 11 para decidir se continua ou finaliza. Dentro do loop, %ebx é copiado
+para %ecx, que é então multiplicado por si mesmo. O resultado (%eax) é impresso. Em seguida, %ebx é incrementado (i++),
+e o loop se repete.
+
+Programa (Soma de Array de Inteiros):
+O programa em Assembly implementa a soma dos elementos de um array de inteiros (4 elementos). Os registradores %ebx 
+(i - índice) e %ecx (soma) são inicializados em 0. O registrador %r12 é o ponteiro inicial para o array. O loop (L1) 
+verifica se o índice (%ebx) é igual a 4 para finalizar. Caso contrário, o código calcula o endereço do elemento atual 
+(&vet[i]) usando um deslocamento de 4×i bytes, soma o valor do elemento (vet[i]) ao total em %ecx (soma += vet[i]), 
+incrementa o índice (i++) e retorna ao loop. Ao sair, o resultado final da soma (%ecx) é movido para %eax e impresso.

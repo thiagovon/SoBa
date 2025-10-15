@@ -1,0 +1,63 @@
+Função add(struct x *x) (Soma de Lista Encadeada):
+A função Assembly percorre uma lista encadeada (estrutura struct x). O registrador 
+%esi (análogo a int a) é inicializado em 0 para acumular a soma.
+
+Loop: O loop (DENTRO_DO_FOR) verifica se o ponteiro da lista %rdi (análogo a x) é 
+nulo. Se for, a função finaliza.
+
+Soma: O campo inteiro (x->val) apontado por %rdi é somado ao acumulador %esi.
+
+Próximo Elemento: O ponteiro %rdi é atualizado para o próximo nó (x = x->next) lendo
+ o conteúdo 8 bytes após o endereço atual, conforme o layout da estrutura.
+
+A compilação e execução confirmaram o resultado esperado.
+
+Função Recursiva add2(struct x *x) (Soma Recursiva de Lista):
+A função implementa a soma dos valores da lista de forma recursiva. O registrador 
+%ebx é salvo na pilha (callee-saved).
+
+Caso Base: Se %rdi (ponteiro x) for nulo, %eax (retorno) recebe 0, e a função finaliza.
+
+Caso Recursivo:
+
+O valor atual do nó (x->val) é salvo em %ebx.
+
+O ponteiro %rdi é avançado para o próximo nó (x = x->next).
+
+A função add2 é chamada recursivamente.
+
+O valor retornado da chamada recursiva (em %eax) é somado ao valor do nó atual (em %ebx).
+
+O valor em %eax é o resultado final, e a função finaliza restaurando %ebx.
+
+Função f(struct p *px, int n) (Processamento de Array de Structs):
+A função itera sobre um array de structs (struct p[]) e chama uma função auxiliar (f) 
+para cada elemento, atualizando um campo.
+
+Loop while: O loop compara o contador de elementos (n em %esi) com 0.
+
+Chamada de Função: Dentro do loop, os parâmetros da função original são salvos. A função
+ f auxiliar é chamada, passando o endereço do elemento atual (%rdi) e o campo de valor 
+ (val em %edx).
+
+Atualização: O valor de retorno de f (em %eax) é armazenado no campo px->val2 do struct 
+atual (endereço 4 bytes após a base do struct).
+
+Iteração: O ponteiro %rdi é avançado 8 bytes (tamanho da struct), e o contador %esi (n) 
+é decrementado.
+
+Função g(int *um, int *outro, int n) (Processamento de Dois Arrays):
+A função itera sobre dois arrays de inteiros (um e outro), usando os valores do primeiro 
+array para fazer uma chamada de função e armazenar o resultado no segundo array. O registrador %rbx (o contador i) é salvo.
+
+Loop for: O loop compara o índice %ebx (i) com o limite %edx (n).
+
+Cálculo de Endereço: Os endereços dos elementos atuais (&outro[i] e &um[i]) são calculados 
+usando o deslocamento de 4×i bytes somado aos endereços base (%rsi e %rdi).
+
+Chamada de Função: Os registradores de parâmetros são salvos. O valor de um[i] é carregado 
+em %edi (primeiro argumento) e a função auxiliar f é chamada.
+
+Atribuição: O valor de retorno de f (em %eax) é armazenado na posição outro[i] (apontada por %r10).
+
+Iteração: O índice %ebx é incrementado (i++), e o loop se repete.

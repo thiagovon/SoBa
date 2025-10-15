@@ -1,26 +1,31 @@
-#int add (int a, int b, int c) {
-    .globl add
+/*
+int add (int a, int b, int c) {
+	return a+b+c;
+}
+*/
+
+/* Dicionário:
+	Reg  Variável
+	%edi    a
+	%esi    b
+	%edx    c
+*/
+
+.text
+.globl add
 add:
-    pushq   %rbp        # salva a base do RA da função chamadora
-    movq    $rsp, %rbp  # cria a base do RA da função chamada  
-    subq    $16, %rsp  # abre espaço para o RA da função chamada
+	/* Registro de Ativação */
+	pushq %rbp    /* salva na pilha o BP da função chamadora e coloca a pilha novamente múltiplo de 16*/
+	movq %rsp, %rbp
 
-    # salvar valor dos registradores callee-saved
-    movq    %r13, -8(%rbp)  # salva o valor de  r13 na função chamadora
+INICIO:
+	movl %edi, %eax
+	addl %esi, %eax
+	addl %edx, %eax
 
-#  return a+b+c;
-#   temp = c            c está em edx (3o parâmetro)
-    movl    %edx, %r13d
-
-#    temp = temp + b    b está em %esi (2o parâmetro)
-    addl    %esi, %r13d
-
-#    temp = temp + a    a está em %edi (1o parâmetro)
-    addl    %edi, %r13d
-
-#    return temp
-    movl    %r13d, %eax
-
-#}
-    #restaurar valores dos registrados callee-saved
-    movq    -8(%rbp), %r13
+FIM:
+	/* Nesse ponto, o valor a ser retornado já está no eax */
+	movq %rbp, %rsp  /*destroi meu RA*/
+	popq %rbp        /* restaura a base do RA da chamadora */
+        /* esses dois comando poderiam ser substituídos por leave */
+        ret
