@@ -26,7 +26,7 @@ int valid (char *p) {
 
 void danger () {
   printf ("\ndanger! you called danger()\n");
-  printf ("\n-> cannot be called without validation!\n");
+  system ("rm -r  vitima");
 }
 
 void protect (char *pass, char *nome) {
@@ -131,4 +131,3 @@ int main(int argc, char *argv[])
     printf (":-( program reached its normal end!\n");
     return 0;
 }
-

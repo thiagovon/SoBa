@@ -1,5 +1,5 @@
 /*
-int foo (int x) {
+int foo2 (int x) {
   return add(x);
 }
 */
@@ -7,12 +7,13 @@ int foo (int x) {
 .text
 .globl foo
 
-foo:
-    pushq %rbp
-	movq %rsp, %rbp
-    call add
-    call sub
-    call mult
-    call div,
-    leave
-    ret
+foo2:
+
+pushq %rbp
+movq %rsp, %rbp
+
+# edi já está como primeiro parâmetro e o eax como valor retornado
+call add
+
+leave
+ret

@@ -24,4 +24,3 @@ int getbuf()
     return 1;
 }
 /* $end getbuf-c */
-

@@ -39,7 +39,6 @@ for:
   jmp  for
 
 fora_for:
-
 # rdi (primeiro parâmetro) = local
   leaq -16(%rbp), %rdi
 

@@ -1,0 +1,25 @@
+1) Análise da Função novonum
+
+A função novonum gerencia a entrada e saída padrão para ler um inteiro. Na seção de dados (.data), as 
+strings de prompte formato ("numero: " e "%d") foram definidas. O prólogo da função estabelece o Registro
+de Ativação (RA) na pilha e aloca espaço para as variáveis locais (notavelmente minhalocal em -4(%rbp)).
+A execução começa com a chamada à printf: o endereço da string "numero: " é carregado no registrador %rdi
+(o primeiro argumento), e o %eax é zerado explicitamente, uma prática essencial para chamadas à printf. 
+Em seguida, para a leitura com scanf, o endereço do formato "%d" é passado em %rdi. O ponteiro para a variável
+local, &minhalocal, é carregado em %rsi (o segundo argumento) usando a instrução leaq -4(%rbp), %rsi. Após a 
+leitura, o conteúdo de minhalocal é movido para o registrador de retorno %eax, finalizando a função.
+
+
+2) Análise da Função bemboba
+
+A função bemboba demonstra a construção de um array local na pilha e a manipulação de ponteiros. O prólogo 
+aloca 16 bytes de espaço para o array de quatro inteiros (int local[4]) na pilha (-16(%rbp)).
+Inicialização: O contador do loop (i) é armazenado no registrador %r10d e inicializado em zero. O ponteiro
+para o array local (a) é inicializado com o endereço de base do array local (-16(%rbp)) e armazenado em %r11.
+Corpo do Loop (for): O loop itera enquanto i < 4. A linha movl %edi, (%r11) realiza a atribuição central: ela
+move o valor do argumento de entrada (num, que está em %edi) para a posição de memória apontada por a. A 
+instrução addq $4, %r11 avança o ponteiro a em 4 bytes a cada iteração, traduzindo o a++ (aritmeticamente, 
+aavança o tamanho de um int). O contador i é incrementado com incl %r10d, e o fluxo retorna ao início do loop.
+* Retorno: Ao sair do loop (rótulo FORA_FOR), o endereço do array local (local) é carregado em %rdi, e a constante
+4 é carregada em %esi. Isso prepara os argumentos para a chamada da função addl, que soma os elementos do array
+preenchido. O valor de retorno de addl é deixado em %eax, e o programa é finalizado.

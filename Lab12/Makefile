@@ -11,7 +11,7 @@ CFLAGS = -Wall -O0
 
 # Build the buffer bomb
 bufbomb: bufbomb.c buf.c hex2raw
-	$(CC) $(CFLAGS) -no-pie -fno-stack-protector -Wa,--execstack -o bufbomb bufbomb.c buf.c 
+	$(CC) $(CFLAGS) -fno-stack-protector -Wa,--execstack -o bufbomb bufbomb.c buf.c 
 
 # Build hex2raw utility
 hex2raw: hex2raw.c
@@ -20,4 +20,3 @@ hex2raw: hex2raw.c
 # Use this when you want to recompile
 clean:
 	-rm -f *.o bufbomb hex2raw *~
-

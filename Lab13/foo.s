@@ -12,8 +12,11 @@ foo:
 pushq %rbp
 movq %rsp, %rbp
 
-mov %edi, %eax
-inc %eax
+#Valor de retorno
+movl %edi, %eax
+
+#Incrementa o primeiro argumento da função
+incl %eax
 
 leave
 ret
