@@ -1,0 +1,28 @@
+. Função foo (ex1.s)
+
+A tradução da função foo para Assembly com comentários funcionou conforme o esperado. No entanto, ao 
+remover o protótipo da função no programa principal (main) e executá-lo, o valor retornado foi 0.0 
+(um float de zero). Esse resultado inesperado provavelmente se deve ao compilador assumir um tipo de 
+retorno padrão (int) na ausência de um protótipo, fazendo com que o programa busque o resultado no 
+registrador errado (%rax em vez de %xmm0, que armazena o float).
+
+2. Função foo1 (ex2.s)
+
+A versão em Assembly da função foo1 produziu o resultado correto. Para garantir isso, foi necessário
+reservar o valor da variável b movendo-o para a pilha de execução (salvando-o temporariamente). 
+Isso foi feito porque o registrador que continha b (%xmm1) é volátil e foi alterado pela chamada à 
+função sin.
+
+3. Função foo2 (ex3.s)
+
+A implementação em Assembly da foo2 foi bem-sucedida. Diferente do caso anterior, aqui foi preciso 
+salvar explicitamente os valores de ambas as variáveis, a e b, na pilha. O objetivo foi protegê-las 
+contra alterações, já que elas seriam perdidas ou corrompidas durante as chamadas sequenciais e 
+independentes das funções sin e cos.
+
+4. Função foo3 (ex4.s)
+
+A tradução da função foo3 para Assembly com comentários foi concluída. Um ponto notável foi a inicialização
+da variável local double r com 0.0. Para conseguir isso, o valor zero foi primeiro carregado em um 
+registrador inteiro (quad) e, em seguida, convertido para o formato double (ponto flutuante de precisão 
+dupla) usando a instrução de conversão apropriada.
