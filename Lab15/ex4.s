@@ -1,4 +1,4 @@
-*/
+/*
 double foo3 (double *a, int n) {
   int i;
   double r = 0.0;
@@ -14,7 +14,7 @@ double *a   %rdi
 double r    %xmm1
 int n       %esi
 int i       %edx
-/*
+*/
 
 .text
 .globl foo3

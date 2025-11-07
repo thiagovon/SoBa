@@ -1,4 +1,4 @@
-*/
+/*
 float foo (double a, float b) {
   return (a+b)*(a-b);
 }
@@ -6,7 +6,7 @@ float foo (double a, float b) {
 Dicionário:
 double a  xmm0
 float b   xmm1
-/*
+*/
 
 .text
 .globl foo

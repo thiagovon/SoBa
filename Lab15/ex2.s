@@ -1,4 +1,4 @@
-*/
+/*
 float foo1 (float a, float b) {
   return sin(a) + b;
 }
@@ -6,7 +6,7 @@ float foo1 (float a, float b) {
 Dicionário
 float a   %xmm0
 float b   %xmm1
-/*
+*/
 
 .text
 .globl foo1

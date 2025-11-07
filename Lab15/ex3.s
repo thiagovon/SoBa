@@ -1,4 +1,4 @@
-*/
+/*
 double foo2 (float a, float b) {
   return sin(a) + cos(b);
 }
@@ -6,7 +6,7 @@ double foo2 (float a, float b) {
 Dicionário
 float a   $xmm0
 float b   $xmm1
-/*
+*/
 
 .text
 .globl foo2
