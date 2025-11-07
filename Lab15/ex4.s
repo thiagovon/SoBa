@@ -20,13 +20,13 @@ int i       %edx
 .globl foo3
 
 foo3:
-
     pushq   %rbp
     movq    %rsp, %rbp
-    subq    ????, %rsp
+    subq    $32, %rsp
 
 # int n;
 
+#COMEÇO:
 # double r = 0.0;
     movl        $0, %edi
     cvtsi2sd    %edi, %xmm1
@@ -56,14 +56,11 @@ foo3:
     movl    -20(%rbp), %esi
     movl    -24(%rbp), %edx
 
-    addsd    %xmm0, %xmm0
+    addsd    %xmm0, %xmm0   # r += sin(*a)
     
-# i++
-    incl    %edx
-# a++
-    incq    %rdi
+    incl    %edx            # i++
+    addq    $8, %rdi        # a++ (tem que adicionar 8 por ser um ponteiro)
 
 FORA_FOR:
-
-
-
+    leave
+    ret
