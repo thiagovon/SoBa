@@ -1,4 +1,4 @@
-. Função foo (ex1.s)
+1. Função foo (ex1.s)
 
 A tradução da função foo para Assembly com comentários funcionou conforme o esperado. No entanto, ao 
 remover o protótipo da função no programa principal (main) e executá-lo, o valor retornado foi 0.0 
