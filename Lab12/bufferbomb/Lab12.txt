@@ -1,0 +1,24 @@
+O experimento inicial foi realizado no arquivo stringinvasora. Nele, os primeiros 32 bytes da função main 
+foram preenchidos com o valor 0. Em seguida, o endereço base do frame (rbp) da main (8 bytes) foi sobrescrito 
+com valores arbitrários.
+
+Ao executar, o programa exibiu a mensagem da função danger (o comportamento esperado), mas, de forma inesperada, 
+não gerou um segmentation fault. Em vez disso, a mensagem da função illegalhandler foi exibida logo depois. 
+Isso sugere que, embora a corrupção da pilha tenha ocorrido, algum mecanismo de tratamento de erro ou proteção 
+foi ativado antes da falha fatal de segmentação.
+
+No segundo experimento, utilizando o arquivo stringinvasora2, estendi a sequência de bytes injetada para garantir 
+que a pilha fosse preenchida com o endereço da função smoke. Após a execução, a saída do terminal confirmou a 
+execução correta, mostrando as mensagens das funções danger e, em seguida, smoke. Como a função smoke termina 
+o programa corretamente ao chamar exit(0), a execução foi encerrada de forma elegante, sem falhas.
+
+O último experimento de injeção de código também foi feito no stringinvasora2. A estratégia foi preencher os 
+bits iniciais do array buf com as instruções do código malicioso (shellcode), que foram obtidas previamente 
+através da desmontagem (objdump) do arquivo objeto codigo.o.
+
+Após preencher os primeiros 32 bits com o código injetado e sobrescrever o rbp da main, o passo crucial foi 
+sobrescrever o endereço de retorno da função getbuf com o endereço de buf. O endereço de buf foi obtido de 
+forma programática pela própria função getbuf, que o exibe na saída. Isso garantiu que, ao retornar de getbuf, 
+o fluxo de execução fosse desviado para o shellcode dentro de buf. Por fim, o endereço da função fizz foi 
+estrategicamente colocado na última posição da string invasora para ser invocado após a conclusão da execução 
+do código inserido na pilha.

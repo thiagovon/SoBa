@@ -2,22 +2,24 @@
 int foo (int x) {
   return x+1;
 }
+
+Dicionário:
+x   edi
 */
 
 .text
 .globl foo
 
 foo:
-
-pushq %rbp
-movq %rsp, %rbp
-
-#Valor de retorno
-movl %edi, %eax
+  pushq %rbp
+  movq %rsp, %rbp
 
 #Incrementa o primeiro argumento da função
-incl %eax
+  incl %eax
 
-leave
-ret
+#Valor de retorno
+  movl %edi, %eax
+
+  leave
+  ret
 

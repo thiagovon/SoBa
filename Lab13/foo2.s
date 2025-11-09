@@ -2,6 +2,9 @@
 int foo2 (int x) {
   return add(x);
 }
+
+Dicionário:
+x   edi
 */
 
 .text
@@ -9,11 +12,11 @@ int foo2 (int x) {
 
 foo2:
 
-pushq %rbp
-movq %rsp, %rbp
+  pushq %rbp
+  movq %rsp, %rbp
 
 # edi já está como primeiro parâmetro e o eax como valor retornado
-call add
+  call add
 
-leave
-ret
+  leave
+  ret

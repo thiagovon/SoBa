@@ -1,0 +1,22 @@
+A função em questão foi traduzida de forma direta e imediata, com todas as linhas de código comentadas.
+Para analisar o resultado da compilação, utilizei o objdump e fiz o disassembly da função, o que permitiu visualizar
+as instruções em código de máquina para cada instrução.
+
+Durante a fase de testes, notei que, inicialmente, a execução do programa principal falhava com um erro de segmentação
+(segmentation fault). Esse problema foi resolvido ao compilar usando a opção -Wa,--execstack, que garante que a stack
+seja executável. Com essa permissão, o programa rodou perfeitamente e retornou o valor esperado.
+
+Um passo crucial foi o cálculo do offset para preencher os bytes da instrução call. Para isso, foi necessário determinar
+o valor x, que representa o deslocamento relativo. Este valor é obtido pela subtração entre o endereço da função alvo 
+(add) e o endereço da instrução que sucede o call no array do código. Como o endereço da instrução seguinte é 
+endereco_base+9 (informação verificada via objdump), a equação utilizada foi: x=add−(codigo+9). Após calcular x, ele foi 
+inserido nas posições corretas do array codigo, respeitando a ordem little endian.
+
+Apesar disso, o programa principal compila sem erros, mas, por um motivo ainda desconhecido, volta a apresentar 
+segmentation fault durante a execução. O erro surge na linha que inicializa a variável inteira i, o que é estranho, 
+pois essa mesma inicialização havia funcionado corretamente no teste anterior (onde a opção --execstack foi usada 
+com sucesso).
+
+Em uma tentativa de solução, substituí a instrução call por jmp no arquivo assembly. Verifiquei com objdump que o 
+código de máquina para jmp é e9, seguido por quatro bytes zero, e mantive o mesmo cálculo de offset relativo. 
+Contudo, o resultado foi o mesmo: o programa compila, mas continua falhando com segmentation fault em sua execução.
