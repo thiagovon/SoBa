@@ -21,7 +21,7 @@ foo1:
   cvtss2sd  $xmm1, $xmm1
 
 # a função sin guarda o valor de pi no xmm1. Por conta disso, precisamos guardá-lo para não perder.
-  movsd $xmm1, -8(%rbp)
+  movsd %xmm1, -8(%rbp)
   call sin
 
 # sin(a) + b
