@@ -1,0 +1,14 @@
+1 - A organização da struct x na memória segue o alinhamento: 8 bytes para double, 4 para float, 2 para short e 2 bytes 
+finais de padding (preenchimento). O programa exibe os endereços e valores hexadecimais seguindo o padrão Little-Endian.
+Essa disposição é confirmada pela saída do programa, que apresenta corretamente a representação do double 
+-4.5 (C0 12 00 00 00 00 00 00), do float 9.75 (41 1c 00 00) e do short -11 (FF F5), respeitando a ordem dos bytes e 
+o preenchimento final.
+
+2 - A função foo foi integralmente traduzida para Assembly e comentada. Os testes de execução confirmaram o comportamento 
+esperado.
+
+3 - Realizei a tradução comentada da função pack para Assembly, obtendo sucesso na execução conforme o previsto.
+
+4 - A função pack1 foi traduzida para Assembly com os devidos comentários. Embora o código compile sem erros, ocorre uma 
+falha de segmentação (segmentation fault) durante a execução (tempo de runtime). Até o momento, não foi possível isolar 
+a causa específica desse acesso inválido à memória.

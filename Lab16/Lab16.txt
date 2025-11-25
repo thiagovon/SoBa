@@ -1,0 +1,26 @@
+2 - Usei o programa nm para visualizar os símbolos do código objeto. As letras indicam:
+
+U: Símbolo não definido no arquivo atual (ex: variável a em temp2.c).
+
+T: Símbolo localizado na seção de texto/código (ex: a em temp1.c [nota: aqui seria main ou similar, 
+verifique se 'a' é função, se for variável deveria ser D ou B] e a função foo).
+
+D: Símbolo inicializado na seção de dados (ex: variáveis globais inicializadas).
+
+3 - O terminal exibe erro de tipos conflitantes para a variável a (declarada como char no .c e int no .h).
+O problema impede a geração do arquivo objeto. Se comentarmos o #include "temp1.h", o código compila normalmente.
+
+4 - a. O programa rodou e exibiu 1277, mas não consegui determinar a razão exata desse resultado numérico.
+
+b. O processo de ligação falha por "múltiplas definições". Ao verificar os símbolos, nota-se que a variável 
+a foi inicializada em ambos os arquivos (temp1.c e temp2.c), gerando conflito de nomes globais.
+
+c. Os programas compilam e o resultado é 1024. O motivo é que a variável a em temp2.c foi definida como static 
+(estática), o que evita o conflito de nomes globais. A função foo altera apenas o a interno de temp2.c, preservando 
+o valor do a de temp1.c que é impresso na tela.
+
+5 - a. O compilador avisa que a função b() foi declarada implicitamente. Ao rodar, ocorre segmentation fault. 
+O nm mostra que b não está definido, logo o programa tenta acessar uma função que não existe nas bibliotecas.
+
+b. O erro se repete. As alterações feitas em temp2.c não afetam o problema principal, que é a chamada inválida 
+da função b() dentro de temp1.c.

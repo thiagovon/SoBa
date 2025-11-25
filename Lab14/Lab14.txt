@@ -1,0 +1,11 @@
+Para multiplicar o float por 2, inicializei a union com o valor recebido. Separei o sinal, expoente e fração
+usando as macros auxiliares. A lógica da multiplicação consistiu apenas em somar 1 ao valor do expoente 
+(já que dobrar o valor equivale a aumentar uma potência de 2). Remontei o número com a macro makefloat 
+atualizando o expoente e mantendo a fração original, retornando o resultado final.
+
+2 - Na função int2float, comecei tratando a exceção do zero e definindo o bit de sinal. Calculei o expoente real 
+($E$) encontrando o bit mais significativo do inteiro e somei 127 para obter o expoente formatado (com viés).
+Para a fração,  removi o bit mais significativo (o "1" implícito). A lógica de bits foi dividida:Se o número cabe em 23 bits 
+($E \le 23$), completei com zeros à direita para preencher o campo da fração (preservando a precisão exata).
+Se o número é muito grande ($E > 23$), desloquei os bits para pegar apenas os 23 mais importantes, aceitando a 
+perda de precisão.Por fim, usei makefloat para gravar os bits na union e retornei o valor como float.
