@@ -1,0 +1,90 @@
+/*
+Felipe Bermudes de Oliveira Leite - 2421786 - 3WA
+Thiago Von Randow Fernandes - 2420001 - 3WA
+*/
+
+TRABALHO SOFTWARE BÁSICO
+O QUE ESTÁ FUNCIONANDO
+----------------------
+O gerador de código foi implementado integralmente em C, cumprindo todos os requisitos especificados no 
+enunciado do trabalho. As seguintes funcionalidades foram testadas e validadas:
+
+1. Gerenciamento do Registro de Ativação (Stack Frame):
+   - O prólogo aloca corretamente 32 bytes na pilha para as 5 variáveis locais e para salvar o parâmetro p0.
+   - As variáveis locais (v0-v4) e o parâmetro (p0) são mapeados corretamente em relação ao registrador %rbp.
+   - O epílogo restaura a pilha e retorna ao chamador.
+
+2. Operações Aritméticas:
+   - Suporte completo às operações de adição (+), subtração (-) e multiplicação (*) com inteiros de 32 bits.
+   - As operações funcionam corretamente com operandos do tipo variável (vX), parâmetro (p0) e constantes ($X).
+
+3. Controle de Fluxo:
+   - Instrução 'ret': Retorno incondicional com valor constante ou variável funcionando.
+   - Instrução 'zret': Retorno condicional (se zero) implementado corretamente, gerenciando o salto condicional
+   (jne) sobre o epílogo.
+
+4. Chamadas de Função (Call):
+   - O cálculo do endereço relativo para instruções 'call' (x86-64 relative offset) foi implementado e testado com sucesso.
+   - A passagem de argumentos segue a convenção System V AMD64 ABI (primeiro argumento em %edi).
+   - O valor de retorno (%eax) é corretamente atribuído à variável de destino.
+
+O QUE NÃO ESTÁ FUNCIONANDO
+Não foram identificados erros ou falhas na implementação das especificações obrigatórias.
+Observação: O parser atual assume que o arquivo de entrada está sintaticamente correto, conforme permitido pelo enunciado 
+("não é necessário fazer tratamento de erros no arquivo de entrada"). Caso o arquivo contenha comandos desconhecidos, o 
+programa aborta com uma mensagem de erro simples.
+
+EXEMPLOS DE TESTES REALIZADOS
+TESTE 1: Fatorial (Recursivo/Iterativo simples)
+Este teste verificou a aritmética, o zret e a auto-chamada.
+
+Código LBS:
+function
+zret p0 $1
+v0 = p0 + $0
+v1 = v0 - $1
+v1 = call 0 v1
+v0 = v0 * v1
+ret v0
+end
+
+Resultado: Sucesso.
+Para entrada 5, o programa gerou código que retornou 120.
+
+-----------------------------
+
+TESTE 2: Soma dos Quadrados (Múltiplas Funções)
+Este teste verificou a capacidade do gerador de lidar com múltiplas funções no mesmo arquivo e chamadas entre funções 
+distintas (forward reference não é necessária pois a ordem é sequencial).
+
+Código LBS:
+function
+v0 = p0 * p0
+ret v0
+end
+function
+zret p0 $0
+v0 = p0 - $1
+v1 = call 0 p0
+v0 = call 1 v0
+v0 = v0 + v1
+ret v0
+end
+
+Resultado: Sucesso.
+Para entrada 3, o cálculo realizado foi (1^2 + 2^2 + 3^2) = 1 + 4 + 9 = 14.
+O código gerado executou corretamente a chamada da função 0 (quadrado) dentro da função 1 (soma recursiva).
+
+-----------------------------
+
+TESTE 3: Erro Sintático (Teste de Falha)
+Testamos o comportamento do gerador ao receber um comando inválido.
+
+Código LBS:
+function
+v0 = p0 / $2  
+ret v0
+end
+
+Resultado: O programa abortou corretamente com a mensagem "erro comando desconhecido na linha 2", pois a divisão 
+(/) não faz parte da especificação LBS.
