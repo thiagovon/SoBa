@@ -8,358 +8,393 @@
 #include <string.h>
 #include "gera_codigo.h"
 
-// Quantidade máxima de funções suportadas
-#define MAX 50
+#define MAX 50 //definindo o limite de 50 func maximas
 
 /*
 RA
-
 v0 -> -4(%rbp)
 v1 -> -8(%rbp)
 v2 -> -12(%rbp)
 v3 -> -16(%rbp)
 v4 -> -20(%rbp)
-p0 -> -24(%rbp)   (parâmetro salvo porque EDI pode ser sobrescrito em calls)
+p0 -> -24(%rbp)   (precaver para caso o edi seja sobrescrito)
 */
 
-// Função auxiliar: imprime mensagem de erro e aborta o programa
-static void error (const char *msg, int line) {
-    fprintf(stderr, "erro %s na linha %d\n", msg, line);
+// Função auxiliar (F.A): imprime erro e encerra o programa
+
+static void error (const char *mensagem, int linha) {
+    fprintf(stderr, "erro %s na linha %d\n", mensagem, linha);
     exit(EXIT_FAILURE);
 }
 
-// emite um único byte no vetor 'cod' e avança 'ppos'
-static void emite_byte(unsigned char cod[], int *ppos, unsigned char b){
-  cod[*ppos] = b;    // coloca o byte na posicao atual 
-  (*ppos)++;         // avanca para a proxima posicao 
+// coloca-se um único byte no vetor e passa a posição com o "prox" 
+
+static void escreve_byte(unsigned char vet[], int *prox, unsigned char bt){
+  vet[*prox] = bt;    // pega o byte para colocar na posição atual do vetor 
+  (*prox)++;         // avança no vetor para a proxima posição
 }
 
-// escreve um inteiro de 4 bytes em little-endian no vetor 'cod'
-static void emite_int(unsigned char cod[], int *ppos, int v){
-  int *p = (int *)&cod[*ppos]; // interpreta posição corrente como int*
-  *p = v;             // escreve 4 bytes equivalentes ao inteiro
-  *ppos += 4;        // anda 4 posicoes 
+// poem no vetor "vet" um inteiro de 4 bytes (little-endian)
+
+static void escreve_int(unsigned char vet[], int *prox, int i){
+  int *p = (int *)&vet[*prox]; // lida com a posicao como int*
+  *p = i;             // escreve 4 bytes 
+  *prox += 4;        // anda 4 na posicao
 }
 
-// Gera o prólogo padrão da função:
-// push %rbp
-// mov %rsp, %rbp
-// sub $32, %rsp   (aloca espaço para as 5 variáveis + p0)
-// mov %edi, -24(%rbp) (salva p0 no RA)
-static void gera_prologo(unsigned char cod[], int *ppos){
-  emite_byte(cod, ppos, 0x55);  // push %rbp
-  emite_byte(cod, ppos, 0x48);  // REX
-  emite_byte(cod, ppos, 0x89);
-  emite_byte(cod, ppos, 0xE5); // mov %rsp, %rbp
+// Configuração inicial do registro de ativação (prólogo):
+// 1. Preserva o RBP antigo
+// 2. Inicializa o novo RBP com o valor de RSP
+// 3. Aloca 32 bytes na pilha para variáveis
+// 4. Salva o parâmetro p0 na posição alocada
+static void gera_prologo(unsigned char vet[], int *prox){
+  escreve_byte(vet, prox, 0x55); // Salva o contexto do RBP anterior
+  escreve_byte(vet, prox, 0x48); // Prefixo REX.W
+  escreve_byte(vet, prox, 0x89);
+  escreve_byte(vet, prox, 0xE5); // Define a nova base da pilha (RBP = RSP)
 
-  // subq $32, %rsp  
-  emite_byte(cod, ppos, 0x48);
-  emite_byte(cod, ppos, 0x83);
-  emite_byte(cod, ppos, 0xEC);
-  emite_byte(cod, ppos, 0x20); // 32 bytes
+  // Expande a pilha (subtrai do RSP) 
+  escreve_byte(vet, prox, 0x48);
+  escreve_byte(vet, prox, 0x83);
+  escreve_byte(vet, prox, 0xEC);
+  escreve_byte(vet, prox, 0x20); // Quantidade de bytes reservados (32)
 
-  // mov %edi, -24(%rbp)   (EDI = p0)
-  emite_byte(cod, ppos, 0x89);
-  emite_byte(cod, ppos, 0x7D);
-  emite_byte(cod, ppos, 0xE8);  // -24 = 0xE8
+  // Armazena p0 (EDI) na memória local
+  escreve_byte(vet, prox, 0x89);
+  escreve_byte(vet, prox, 0x7D);
+  escreve_byte(vet, prox, 0xE8);  // Deslocamento de -24 em relação ao RBP
 }
 
-// epílogo padrão da função:
-// leave
-// ret
-static void gera_epilogo(unsigned char cod[], int *ppos) {
-  emite_byte(cod, ppos, 0xC9);  // leave
-  emite_byte(cod, ppos, 0xC3);  // ret
+// Desfaz o registro de ativação e retorna o controle ao chamador:
+// O comando 'leave' restaura RSP e RBP, o 'ret' desempilha o endereço de retorno.
+
+static void gera_epilogo(unsigned char vet[], int *prox) {
+  escreve_byte(vet, prox, 0xC9);  // leave
+  escreve_byte(vet, prox, 0xC3);  // ret
 }
 
-// Carrega um varpc (variável, parâmetro ou constante) para %eax
-static void carrega_varpc_em_eax(unsigned char cod[], int *ppos, char var, int idx){
+// Abstração para carregar operandos de diferentes tipos para o acumulador (EAX)
+
+static void carrega_varpc_em_eax(unsigned char vet[], int *prox, char var, int ind){
    if (var == '$') {
-        // mov $constante, %eax
-        emite_byte(cod, ppos, 0xB8);   
-        emite_int (cod, ppos, idx);     
+        // Operação Imediata: O valor da constante é copiado diretamente
+        escreve_byte(vet, prox, 0xB8);   
+        escreve_int (vet, prox, ind);     
     }
+
     else if (var == 'v') {
-        // mov -offset(%rbp), %eax
-        int offset = -4 * (idx + 1);   
-        emite_byte(cod, ppos, 0x8B);
-        emite_byte(cod, ppos, 0x45);
-        emite_byte(cod, ppos, (unsigned char)offset);
+        // Acesso à Memória (Variável Local):
+        // Calcula o endereço efetivo baseado no índice (inteiros de 4 bytes)
+        int offset = -4 * (ind + 1);   
+        escreve_byte(vet, prox, 0x8B);
+        escreve_byte(vet, prox, 0x45);
+        escreve_byte(vet, prox, (unsigned char)offset);
     }
+
     else if (var == 'p') {
-        // única possibilidade é p0 → -24(%rbp)
-        emite_byte(cod, ppos, 0x8B);
-        emite_byte(cod, ppos, 0x45);
-        emite_byte(cod, ppos, 0xE8);   
+        // Recuperação de Parâmetro:
+        // Busca p0 na posição onde foi preservado (-24 do RBP)
+        escreve_byte(vet, prox, 0x8B);
+        escreve_byte(vet, prox, 0x45);
+        escreve_byte(vet, prox, 0xE8);   
     }
+
     else {
-        error("operando invalido no carregamento em EAX", 0);
+        error("identificador de operando inválido.", 0);
     }
 }
 
 
-// Salva %eax no destino (vX ou p0)
-static void salva_eax_em_var(unsigned char cod[], int *ppos, char var, int idx){
-  if (var == 'v') {
-    int offset = -4 * (idx + 1);
+// Transfere o conteúdo do registrador de retorno (EAX) para a memória (variável ou parâmetro)
+static void salva_eax_em_var(unsigned char vet[], int *prox, char var, int ind){
+    if (var == 'v') {
+    // Localiza a variável na pilha (cada int ocupa 4 bytes negativos a partir de RBP)
+    int offset = -4 * (ind + 1);
 
-     // mov %eax, -offset(%rbp)
-    emite_byte(cod, ppos, 0x89); 
-    emite_byte(cod, ppos, 0x45); 
-    emite_byte(cod, ppos, (unsigned char)offset);
-  } else if (var == 'p') {
-    // sobrescreve p0
-    emite_byte(cod, ppos, 0x89); 
-    emite_byte(cod, ppos, 0x45); 
-    emite_byte(cod, ppos, 0xE8);
-  } else {
-    error("destino invalido no salvamento de EAX", 0);
+    // Operação de Store (MOV %eax, -offset(%rbp))
+    escreve_byte(vet, prox, 0x89); 
+    escreve_byte(vet, prox, 0x45); 
+    escreve_byte(vet, prox, (unsigned char)offset);
+  } 
+
+    else if (var == 'p') {
+    // Atualiza a cópia local do parâmetro p0 (endereço fixo -24)
+    escreve_byte(vet, prox, 0x89); 
+    escreve_byte(vet, prox, 0x45); 
+    escreve_byte(vet, prox, 0xE8);
+  }
+    else {
+    error("Destino de atribuição inválido", 0);
   }
 }
 
 
-// Gera operação aritmética: var0 = var1 op var2
-static void gera_oper(unsigned char cod[], int *ppos,
-                      char var0, int idx0,
-                      char var1, int idx1,
-                      char op, char var2, int idx2)
+// instruções para cálculo aritmético e atribuição
+static void gera_oper(unsigned char vet[], int *prox,
+                      char var0, int ind0,
+                      char var1, int ind1,
+                      char op, char var2, int ind2)
 {
 
-  // carrega var1 em %eax
-  carrega_varpc_em_eax(cod, ppos, var1, idx1);
+  // Move o primeiro operando para o EAX
+  carrega_varpc_em_eax(vet, prox, var1, ind1);
 
-   // agora carrega var2 em %ecx
+  // Move o segundo operando para o Registrador ECX
   if (var2 == 'v') {
-      int offset = -4 * (idx2 + 1);
-      emite_byte(cod, ppos, 0x8B); 
-      emite_byte(cod, ppos, 0x4D); 
-      emite_byte(cod, ppos, (unsigned char)offset); 
+      // Acesso à memória
+      int offset = -4 * (ind2 + 1);
+      escreve_byte(vet, prox, 0x8B); // MOV para registrador
+      escreve_byte(vet, prox, 0x4D); 
+      escreve_byte(vet, prox, (unsigned char)offset); 
   } 
   else if (var2 == 'p') {
-      emite_byte(cod, ppos, 0x8B); 
-      emite_byte(cod, ppos, 0x4D); 
-      emite_byte(cod, ppos, 0xE8); 
+      // Acesso ao Parâmetro (Endereço fixo no frame)
+      escreve_byte(vet, prox, 0x8B); 
+      escreve_byte(vet, prox, 0x4D); 
+      escreve_byte(vet, prox, 0xE8); 
   } 
   else if (var2 == '$') {
-      emite_byte(cod, ppos, 0xB9); 
-      emite_int(cod, ppos, idx2);
+      escreve_byte(vet, prox, 0xB9); // MOV imediato para ECX
+      escreve_int(vet, prox, ind2);
   } 
   else {
-      error("operando invalido no load em ecx", 0);
+      error("Tipo de operando inválido para carga em ECX", 0);
   }
 
-  // aplica operação (eax = eax op ecx)
+  // aplica operação "eax = eax op ecx" (Resultado fica em EAX)
   if (op == '+'){
-    emite_byte(cod, ppos, 0x01); 
-    emite_byte(cod, ppos, 0xC8); // add %ecx, %eax
+    escreve_byte(vet, prox, 0x01); // ADD (r/m32 para r32)
+    escreve_byte(vet, prox, 0xC8); // Soma ECX ao EAX
   }
   else if (op == '-'){
-    emite_byte(cod, ppos, 0x29); 
-    emite_byte(cod, ppos, 0xC8); // sub %ecx, %eax
+    escreve_byte(vet, prox, 0x29); // SUB
+    escreve_byte(vet, prox, 0xC8); // Subtrai ECX de EAX
   }
   else if (op == '*'){
-    emite_byte(cod, ppos, 0x0F); 
-    emite_byte(cod, ppos, 0xAF); 
-    emite_byte(cod, ppos, 0xC1); // imul %ecx, %eax
+    escreve_byte(vet, prox, 0x0F); // Prefixo para instruções
+    escreve_byte(vet, prox, 0xAF); // IMUL
+    escreve_byte(vet, prox, 0xC1); // Multiplica EAX por ECX
   }
   else {
-    error("operador desconhecido", 0);
+    error("Operador aritmético desconhecido", 0);
   }
 
-  // salva resultado em var0
-  salva_eax_em_var(cod, ppos, var0, idx0);
+  // Salva o conteúdo de EAX na variável de destino
+  salva_eax_em_var(vet, prox, var0, ind0);
 }
 
-// Gera ret varpc
-static void gera_ret(unsigned char cod[], int *ppos, char var0, int idx0) {
-    carrega_varpc_em_eax(cod, ppos, var0, idx0); // carrega valor de retorno
-    gera_epilogo(cod, ppos);  // leave/ret
+// define o resultado e encerra a função
+static void gera_ret(unsigned char vet[], int *prox, char var0, int ind0) {
+    // move o operando de retorno para o acumulador (%eax)
+    carrega_varpc_em_eax(vet, prox, var0, ind0); 
+
+    // Desfaz o stack frame e executa o salto de retorno 
+    gera_epilogo(vet, prox);  
 }
 
-// Gera retorno condicional:
-//
-// zret x y
-//
-// if x == 0, retorna y
-static void gera_zret(unsigned char cod[], int *ppos,
-                      char var0, int idx0,
-                      char var1, int idx1)
+// Geração de Retorno Condicional (ZRET):
+// Realiza o retorno antecipado se o primeiro operando for nulo.
+// if (var0 == 0) return var1;
+static void gera_zret(unsigned char vet[], int *prox,
+                      char var0, int ind0,
+                      char var1, int ind1)
 {
 
-  // calcula quantos bytes serão pulados caso x != 0
+  //Pré-cálculo do deslocamento 
+  // Precisamos saber o tamanho da instrução 'mov' de retorno para configurar o pulo do JNE.
+  // O tamanho varia conforme o tipo do operando (var1)
   int set_size;
-  if (var1 == 'v') set_size = 3;       // mov -disp(%rbp), %eax
-  else if (var1 == 'p') set_size = 3;  // mov -24(%rbp), %eax
-  else set_size = 5;                   // mov $imm32, %eax
+  if (var1 == 'v') set_size = 3;       // MOV memória -> reg (3 bytes)
+  else if (var1 == 'p') set_size = 3;  // MOV memória -> reg (3 bytes)
+  else set_size = 5;                   // MOV imediato -> reg (5 bytes)
 
   int epilogue_size = 2;  // leave + ret
-  int skip = set_size + epilogue_size;
+  int skip = set_size + epilogue_size; // total de bytes a pular caso a condição falhe
 
-  // carrega var0 em eax
-  carrega_varpc_em_eax(cod, ppos, var0, idx0);
-  // cmp %eax, 0
-  emite_byte(cod, ppos, 0x83); 
-  emite_byte(cod, ppos, 0xF8); 
-  emite_byte(cod, ppos, 0x00);
+  // avaliação da "var0 == 0"
+  // carrega o operando de teste em %eax
+  carrega_varpc_em_eax(vet, prox, var0, ind0);
 
-  // jne pula
-  emite_byte(cod, ppos, 0x75); 
-  emite_byte(cod, ppos, (unsigned char)skip);
+  // subtrai 0 de %eax
+  escreve_byte(vet, prox, 0x83); 
+  escreve_byte(vet, prox, 0xF8); 
+  escreve_byte(vet, prox, 0x00); // cmp $0, %eax
 
-  // parte executada caso eax == 0:
-  carrega_varpc_em_eax(cod, ppos, var1, idx1);
-  gera_epilogo(cod, ppos);
+  // jne - se ZF=0 (var0 != 0), salta sobre o bloco de retorno
+  escreve_byte(vet, prox, 0x75); 
+  escreve_byte(vet, prox, (unsigned char)skip);
+
+  // essa parte só executa se var0 == 0
+  carrega_varpc_em_eax(vet, prox, var1, ind1);
+  gera_epilogo(vet, prox);
 }
 
 // Gera instrução vX = call N varpc
-static void gera_call(unsigned char cod[], int *ppos,
-                      char var0, int idx0,
+static void gera_call(unsigned char vet[], int *prox,
+                      char var0, int ind0,
                       int num_func,
-                      char var1, int idx1,
+                      char var1, int ind1,
                       long end_funcoes[])
 {
-  // prepara argumento em %edi
+  // Move o parâmetro para o registrador %edi antes de transferir o controle
   if (var1 == 'v') {
-    int offset = -4 * (idx1 + 1);
-    emite_byte(cod, ppos, 0x8B); 
-    emite_byte(cod, ppos, 0x7D); 
-    emite_byte(cod, ppos, (unsigned char)offset);
+    int offset = -4 * (ind1 + 1);
+    escreve_byte(vet, prox, 0x8B); // MOV memória -> reg
+    escreve_byte(vet, prox, 0x7D); 
+    escreve_byte(vet, prox, (unsigned char)offset);
   } 
   else if (var1 == 'p') {
-    emite_byte(cod, ppos, 0x8B); 
-    emite_byte(cod, ppos, 0x7D); 
-    emite_byte(cod, ppos, 0xE8);
+    escreve_byte(vet, prox, 0x8B); 
+    escreve_byte(vet, prox, 0x7D); 
+    escreve_byte(vet, prox, 0xE8);
   } 
   else if (var1 == '$') {
-    emite_byte(cod, ppos, 0xBF); 
-    emite_int(cod, ppos, idx1);
+    escreve_byte(vet, prox, 0xBF); // MOV imediato -> %edi
+    escreve_int(vet, prox, ind1);
   } 
   else {
-    error("operando invalido no call", 0);
+    error("Tipo de operando inválido para argumento de CALL", 0);
   }
 
-  // call rel32
-  emite_byte(cod, ppos, 0xE8);
+  // call Rel32 - 0xE8
+  escreve_byte(vet, prox, 0xE8);
 
-  long endereco_funcao = end_funcoes[num_func];   
-  long rip_next        = (long)(&cod[*ppos + 4]); // endereço após call
+  // resolução de Endereço (Linkagem):
+  // o CALL usa endereçamento relativo ao PC  
+  // offset = endereço_alvo - endereço_próxima_instrução
+  long endereco_alvo = end_funcoes[num_func];   
 
-  int rel = (int)(endereco_funcao - rip_next);
-  emite_int(cod, ppos, rel); // escreve deslocamento
+  // o ponteiro *prox aponta para o início do offset (4 bytes). 
+  // logo, a próxima instrução começa em *prox + 4.
+  long next_rip = (long)(&vet[*prox + 4]); // endereço após call
 
-  // salva retorno (%eax) em var0
-  salva_eax_em_var(cod, ppos, var0, idx0);
+  int desloc = (int)(endereco_alvo - next_rip);
+  escreve_int(vet, prox, desloc); // grava o deslocamento calculado
+
+  // o resultado da função chamada está em %eax
+  salva_eax_em_var(vet, prox, var0, ind0);
 }
 
 
 // Função principal do gerador de código
 void gera_codigo (FILE *f, unsigned char code[], funcp *entry) {
-  int line = 1;
+  int linha = 1;
   int c;
-  int pos = 0;                 // posição atual de escrita no vetor code[]
-  long end_funcoes[MAX];       // guarda endereço inicial de cada função
-  int func_atual = 0;          // índice da função atual
-  int inicio_ultima_funcao = 0;
+  int pos = 0;              // onde estamos escrevendo no vetor de bytes
+  long end_funcoes[MAX];    // guarda onde começa cada função (para os CALLs)
+  int id_funcao = 0;        // contador: função 0, função 1, função 2...
+  int end_main = 0;         // O endereço da última função lida
     
-  // lê arquivo caractere a caractere
+  // lê arquivo
   while ((c = fgetc(f)) != EOF) {
 
     switch (c) {
-        // Reconhece início de função: "function"
         case 'f': { 
             char c0;
             if (fscanf(f, "unction%c", &c0) != 1)
-                error("comando invalido", line);
-            // registra ponto onde nova função começa
-            inicio_ultima_funcao = pos;
-            end_funcoes[func_atual++] = (long)&code[pos];
+                error("comando invalido", linha);
+
+            // registra p inicio da func
+            end_main = pos;
+            end_funcoes[id_funcao++] = (long)&code[pos];
 
             // insere prologo dessa função
             gera_prologo(code, &pos); 
             break;
         }
 
-        // Reconhece "end"
+        // detecta o marcador de fim de escopo da função
         case 'e': { 
-            fscanf(f, "nd");   // consome 'nd'
-            gera_epilogo(code, &pos);
+            fscanf(f, "nd");
+            gera_epilogo(code, &pos); // instrução para limpeza da pilha
         break;
 }
 
-        // ret varpc
+        // processamento do ret
         case 'r': { 
             char var0;
-            int idx0 = 0;
+            int ind0 = 0;
 
-            // lê o caractere após "ret "
+            // identifica o tipo do operando de retorno
             if (fscanf(f, "et %c", &var0) != 1)
-                error("comando invalido", line);
+                error("comando 'ret' malformado", linha);
 
             if (var0 == '$') {
-                // constante
-                if (fscanf(f, "%d", &idx0) != 1)
-                    error("constante invalida em ret", line);
+                // caso constante, extrai o valor literal
+
+                if (fscanf(f, "%d", &ind0) != 1)
+                    error("constante invalida em ret", linha);
             }
             else if (var0 == 'p') {
-                // apenas p0 é permitido, sem número extra
+                // valida se é 'p0' (único permitido)
+
                 char zero;
                 if (fscanf(f, "%c", &zero) != 1 || zero != '0')
-                    error("esperado p0 em ret", line);
-                idx0 = 0; 
+                    error("apenas 'p0' é permitido em 'ret'", linha);
+                ind0 = 0; 
             }
             else if (var0 == 'v') {
-                // variável local precisa de número
-                if (fscanf(f, "%d", &idx0) != 1)
-                    error("indice de variavel invalido em ret", line);
+                // caso variável local: Extrai o índice da variável (v0..v4)
+                if (fscanf(f, "%d", &ind0) != 1)
+                    error("indice de variavel invalido em ret", linha);
             }
             else {
-                error("operando invalido em ret", line);
+                error("operando desconhecido em 'ret'", linha);
             }
 
-            gera_ret(code, &pos, var0, idx0);
+            // move o valor para %eax e retorna
+            gera_ret(code, &pos, var0, ind0);
             break;
         }
 
-        // zret x y
+        // processamento da instrução de retorno condicional ("zret")
+        // retorna se o primeiro operando for zero 
         case 'z': {  
-            int idx0, idx1;
+            int ind0, ind1;
             char var0, var1;
 
-            if (fscanf(f, "ret %c%d %c%d", &var0, &idx0, &var1, &idx1) != 4)
-                error("comando invalido", line);
+            // extrai os dois op: Condição (var0) e valor de retorno (var1)
+            if (fscanf(f, "ret %c%d %c%d", &var0, &ind0, &var1, &ind1) != 4)
+                error("operandos inválidos para 'zret'", linha);
 
-            gera_zret(code, &pos, var0, idx0, var1, idx1); // gera o retorno condicional
+            // gera código para teste condicional e possível retorno
+            gera_zret(code, &pos, var0, ind0, var1, ind1);
             break;
         }
 
-        // atribuição: vX = ...
+        // reconhecimento de Atribuição (vX = ...)
         case 'v': {  
-            int idx0;
-            char var0 = c, c0;
+            int ind0;
+            char var0 = c, c0; // var0 recebe 'v'
 
-            if (fscanf(f, "%d = %c", &idx0, &c0) != 2)
-                error("comando invalido", line);
+            if (fscanf(f, "%d = %c", &ind0, &c0) != 2)
+                error("Erro de sintaxe na atribuição", linha);
 
+            // verifica se o R-Value é uma chamada de função
             if (c0 == 'c') { // call
 
-                int fun, idx1;
+                int fun, ind1;
                 char var1;
 
-                if (fscanf(f, "all %d %c%d\n", &fun, &var1, &idx1) != 3)
-                    error("comando invalido", line);
+                // ID da função e parâmetro
+                if (fscanf(f, "all %d %c%d\n", &fun, &var1, &ind1) != 3)
+                    error("chamada de função malformada", linha);
 
-                gera_call(code, &pos, var0, idx0, fun, var1, idx1, end_funcoes); // gera o call
+                // emite sequência de chamada (Passagem de param + CALL)
+                gera_call(code, &pos, var0, ind0, fun, var1, ind1, end_funcoes); // gera o call
             }
 
-            else { // operação aritmética
+            else { // caso contrário, expressão aritmética binária
 
-                int idx1, idx2;
-                char var1 = c0, var2, op;
+                int ind1, ind2;
+                char var1 = c0, var2, op; // var1 já pegou o primeiro char do operando
 
-                if (fscanf(f, "%d %c %c%d", &idx1, &op, &var2, &idx2) != 4)
-                    error("comando invalido", line);
+                // extração do operador e do segundo operando
+                if (fscanf(f, "%d %c %c%d", &ind1, &op, &var2, &ind2) != 4)
+                    error("erro de sintaxe em expressão aritmética", linha);
 
-                gera_oper(code, &pos, var0, idx0, var1, idx1, op, var2, idx2); // gera a operacao
+                // (Add, Sub, Mul)
+                gera_oper(code, &pos, var0, ind0, var1, ind1, op, var2, ind2); // gera a operacao
             }
 
             break;
@@ -368,16 +403,18 @@ void gera_codigo (FILE *f, unsigned char code[], funcp *entry) {
         case '\n':
         case ' ':
         case '\t':
-            /* ignora brancos soltos (o fscanf(" ") no fim já ajuda) */
+            // ignora brancos soltos 
             break;
 
         default:
-            error("comando desconhecido", line);
-    }
+            error("Token desconhecido", linha);
+    } // fim do switch
 
-    line++;
-    fscanf(f, " ");  // consome espaços entre tokens
+    linha++; // incrementa contador para relatório de erros
+    fscanf(f, " ");  // consome espaços em branco residuais entre comandos
   }
-  // Endereço da última função (chamada pelo main)
-  *entry = (funcp)(code + inicio_ultima_funcao);
+  // definição do Entry Point do programa:
+  // calcula o endereço de memória absoluto da última função processada
+  // para que o loader/main possa executá-la.
+  *entry = (funcp)(code + end_main);
 }
